@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { INITIAL_WHISPER, REFERENCE_MATERIAL, SKILLS } from "../const";
-import { MessageSquare, Sparkles, Brain, ArrowRight, HelpCircle, FileText, Settings, Play } from "lucide-react";
+import { INITIAL_WHISPER, SKILLS } from "../const";
+import { MessageSquare, Sparkles, Brain, ArrowRight, Settings, Play } from "lucide-react";
 import { toast } from "sonner";
 
 interface CoreWhisperWindowProps {
@@ -25,20 +25,20 @@ export default function CoreWhisperWindow({ onTriggerGenerate }: CoreWhisperWind
     setTimeout(() => {
       setIsGenerating(false);
       onTriggerGenerate(whisperText);
-      toast.success("🚀 融合成功！初稿 v1 已生成，请查看右侧/下方的内容生成流程！");
+      toast.success("🚀 融合成功！初稿 v1 已生成，请查看下方的内容生成流程！");
     }, 2000);
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 w-full">
       {/* 1. Core Window: Whisper Input */}
-      <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm flex flex-col">
+      <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm flex flex-col w-full">
         {/* Window Header */}
         <div className="px-5 py-3.5 border-b border-border bg-muted/20 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-full text-amber-500 animate-pulse" />
-            <span className="font-serif text-sm font-bold text-foreground">
-              我的创作起点（碎碎念灵感窗口）
+            <MessageSquare className="w-4 h-full text-amber-500" />
+            <span className="font-serif text-xs font-bold text-foreground uppercase tracking-wider">
+              1. “碎碎念”灵感沙盒窗口 (Whisper Box)
             </span>
           </div>
           <span className="text-[10px] font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded border border-border/40">
@@ -49,15 +49,15 @@ export default function CoreWhisperWindow({ onTriggerGenerate }: CoreWhisperWind
         {/* Window Body: Interactive Textarea */}
         <div className="p-5 flex flex-col gap-4">
           <p className="font-serif text-xs text-muted-foreground leading-relaxed">
-            💡 <strong>这里是您的专属灵感沙盒</strong>。不需要任何精美排版，随手记下一句话、一个自嘲、或者一段粗糙的想法。CoWriter 写作流将以此为“灵魂”进行扩写。
+            💡 <strong>在这里输入或倾倒您的灵感想法</strong>。不需要任何精美排版，随手记下一句话、一个自嘲、或者一段粗糙的想法。CoWriter 写作流将以此为“灵魂”进行扩写。
           </p>
 
-          <div className="relative">
+          <div className="relative w-full">
             <textarea
               value={whisperText}
               onChange={(e) => setWhisperText(e.target.value)}
               placeholder="在这里输入您的灵感碎碎念..."
-              className="w-full min-h-[180px] p-4 font-serif text-sm bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y leading-relaxed text-foreground/90"
+              className="w-full min-h-[160px] p-4 font-serif text-xs bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y leading-relaxed text-foreground/90"
             />
             {/* Post-it Note Corner Aesthetic */}
             <div className="absolute bottom-2 right-2 w-3 h-3 bg-amber-500/20 rounded-tl-md border-t border-l border-amber-500/30 pointer-events-none" />
@@ -98,10 +98,10 @@ export default function CoreWhisperWindow({ onTriggerGenerate }: CoreWhisperWind
 
       {/* 2. Visualized Generation Logic Panel (Conditional Render) */}
       {showLogic && (
-        <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-5 flex flex-col gap-4 animate-in fade-in slide-in-from-top-3 duration-300">
+        <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-5 flex flex-col gap-4 animate-in fade-in slide-in-from-top-3 duration-300 w-full">
           <div className="flex items-center gap-2 border-b border-amber-500/15 pb-2.5">
             <Brain className="w-4 h-full text-amber-500" />
-            <h4 className="font-serif text-sm font-bold text-foreground">
+            <h4 className="font-serif text-xs font-bold text-foreground uppercase tracking-wider">
               CoWriter AI 核心生成逻辑可视化
             </h4>
           </div>
@@ -116,7 +116,7 @@ export default function CoreWhisperWindow({ onTriggerGenerate }: CoreWhisperWind
             <div className="bg-background border border-amber-500/15 rounded-lg p-3 flex flex-col gap-1.5 relative">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-amber-500" />
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
                   灵魂输入 (Soul)
                 </span>
               </div>
@@ -133,13 +133,13 @@ export default function CoreWhisperWindow({ onTriggerGenerate }: CoreWhisperWind
             <div className="bg-background border border-amber-500/15 rounded-lg p-3 flex flex-col gap-1.5 relative">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-primary" />
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-primary">
+                <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-primary">
                   风格约束 (Style DNA)
                 </span>
               </div>
               <span className="font-serif text-xs font-semibold text-foreground">写作基因与 Skill</span>
               <p className="text-[10px] text-muted-foreground leading-relaxed font-serif">
-                强制注入中短句、口语连缀、括号吐槽，封禁黑话词。
+                强制注入中短句、口语连缀、括号吐槽，封禁大厂黑话词。
               </p>
               <div className="hidden md:block absolute -right-3.5 top-1/2 -translate-y-1/2 z-10">
                 <ArrowRight className="w-4 h-full text-amber-500/40" />
@@ -150,7 +150,7 @@ export default function CoreWhisperWindow({ onTriggerGenerate }: CoreWhisperWind
             <div className="bg-background border border-amber-500/15 rounded-lg p-3 flex flex-col gap-1.5">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   素材扩充 (Material)
                 </span>
               </div>
@@ -163,7 +163,7 @@ export default function CoreWhisperWindow({ onTriggerGenerate }: CoreWhisperWind
 
           {/* Logic Engine Pipeline details */}
           <div className="bg-background/50 border border-amber-500/10 rounded-lg p-3.5 flex flex-col gap-2">
-            <span className="font-mono text-[10px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+            <span className="font-mono text-[9px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
               <Settings className="w-3 h-full animate-spin" />
               ENGINE PIPELINE (运行期指令装载)
             </span>
@@ -175,13 +175,6 @@ export default function CoreWhisperWindow({ onTriggerGenerate }: CoreWhisperWind
                     {skill.name}
                   </span>
                   <p className="text-[10px]">{skill.desc}</p>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {skill.rules.slice(0, 2).map((r, rIdx) => (
-                      <span key={rIdx} className="bg-muted px-1 py-0.5 rounded text-[9px] text-muted-foreground">
-                        ✓ {r}
-                      </span>
-                    ))}
-                  </div>
                 </div>
               ))}
             </div>
