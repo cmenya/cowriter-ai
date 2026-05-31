@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { ARTICLE_VERSIONS, STYLE_DNA } from "../const";
-import { BookOpen, FileText, ChevronRight, HelpCircle, MessageSquare, Sparkles, Highlighter, AlertCircle } from "lucide-react";
+import { ARTICLE_VERSIONS } from "../const";
+import { BookOpen, FileText, ChevronRight, HelpCircle, MessageSquare, Sparkles, Highlighter, AlertCircle, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 interface ArticleReaderProps {
@@ -11,6 +11,7 @@ interface ArticleReaderProps {
 export default function ArticleReader({ selectedVersion, onSelectVersion }: ArticleReaderProps) {
   const [activeComment, setActiveComment] = useState<string | null>(null);
   const [highlightDeAI, setHighlightDeAI] = useState(true);
+  const [draftCompareMode, setDraftCompareMode] = useState(false); // Default to false: ONLY show Final!
 
   const currentArticle = ARTICLE_VERSIONS.find(v => v.version === selectedVersion)!;
 
@@ -18,6 +19,13 @@ export default function ArticleReader({ selectedVersion, onSelectVersion }: Arti
   useEffect(() => {
     setActiveComment(null);
   }, [selectedVersion]);
+
+  // If compare mode is off, always lock to "final" version
+  useEffect(() => {
+    if (!draftCompareMode && selectedVersion !== "final") {
+      onSelectVersion("final");
+    }
+  }, [draftCompareMode]);
 
   // Render content with interactive sticky notes for brackets
   const renderFormattedContent = (text: string) => {
@@ -54,7 +62,6 @@ export default function ArticleReader({ selectedVersion, onSelectVersion }: Arti
         );
       }
       if (p.startsWith("- ")) {
-        // Bullet list item
         return (
           <li key={pIdx} className="ml-4 mb-2 list-disc font-serif text-[14px] md:text-[15px] text-foreground/90 leading-relaxed">
             {p.replace("- ", "")}
@@ -65,10 +72,9 @@ export default function ArticleReader({ selectedVersion, onSelectVersion }: Arti
         return <hr key={pIdx} className="my-6 border-t border-border/60" />;
       }
 
-      // Check for bracket comments in text
+      // Check for bracket comments in text (e.g. 😅 or other brackets)
       const hasBrackets = p.includes("（") && p.includes("）");
       if (hasBrackets) {
-        // Find bracket text
         const match = p.match(/（(.*?)）/);
         if (match) {
           const bracketText = match[1];
@@ -81,7 +87,7 @@ export default function ArticleReader({ selectedVersion, onSelectVersion }: Arti
                 onClick={() => {
                   setActiveComment(activeComment === pIdx.toString() ? null : String(pIdx));
                   if (activeComment !== pIdx.toString()) {
-                    toast.info("💡 已展开作者碎碎念（括号内真话）");
+                    toast.info("💡 已展开 Asuka 的碎碎念（括号内真话）");
                   }
                 }}
                 className={`sticky-note px-2 py-0.5 mx-1 rounded text-[11px] inline-flex items-center gap-1 cursor-pointer transform -rotate-1 hover:scale-105 hover:shadow-md transition-all font-sans font-semibold ${
@@ -91,18 +97,18 @@ export default function ArticleReader({ selectedVersion, onSelectVersion }: Arti
                 }`}
               >
                 <MessageSquare className="w-3 h-full" />
-                作者碎碎念 💬
+                我的碎碎念 💬
               </span>
               {parts[1]}
               
               {activeComment === pIdx.toString() && (
                 <span className="block my-3 p-4 bg-amber-500/10 border-l-4 border-amber-500 rounded-r-lg text-xs md:text-sm animate-in fade-in slide-in-from-top-2 duration-200 font-sans text-foreground/90 leading-relaxed">
                   <span className="font-bold block text-[10px] text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1 font-mono">
-                    SOUL WHISPER (括号内真话)
+                    ASUKA'S WHISPER (括号吐槽)
                   </span>
                   “{bracketText}”
                   <span className="block mt-2 text-[10px] text-muted-foreground font-mono">
-                    💡 de-AI-writing 诊断：此处将冰冷论述转化为带有情绪的个人自嘲，打破了 AI 腔，赋予文章呼吸感。
+                    💡 de-AI-writing 诊断：此处融入了 Asuka 作为职场妈妈最真实的深夜带娃细节与自嘲，瞬间拉近了与读者的距离。
                   </span>
                 </span>
               )}
@@ -111,16 +117,16 @@ export default function ArticleReader({ selectedVersion, onSelectVersion }: Arti
         }
       }
 
-      // De-AI Highlights (highlighting good natural phrasing if toggled)
+      // De-AI Highlights
       if (highlightDeAI && selectedVersion === "final") {
-        // Highlight some key phrases that represent great style
         const highlightPhrases = [
-          "大脑对时间的处理其实很像记账",
-          "尾巴",
-          "哄睡要一个小时，等他终于睡着，我的专注力也基本耗完了",
+          "我做过很多次这样的事",
+          "一觉睡过去，任务就换了账",
+          "买东西付了定金，尾款突然就没那么难接受",
+          "前额叶的\"清障\"时刻",
+          "大脑里负责理性判断的那个部门已经没有足够的资源了",
           "晚上是任务的起点，白天是续集",
           "替明天的自己存一点\"心理资产\"",
-          "动一下就行，做多做少看状态",
           "大脑会收到\"我赢了\"的信号",
           "不需要很多，动一下就够了"
         ];
@@ -133,7 +139,7 @@ export default function ArticleReader({ selectedVersion, onSelectVersion }: Arti
             hasMatch = true;
             formattedText = formattedText.replace(
               phrase, 
-              `<span class="bg-emerald-500/15 border-b border-emerald-500/30 px-0.5 rounded text-emerald-950 dark:text-emerald-300 font-semibold" title="去 AI 味 Style DNA 优秀句式">${phrase}</span>`
+              `<span class="bg-emerald-500/15 border-b border-emerald-500/30 px-0.5 rounded text-emerald-950 dark:text-emerald-300 font-semibold" title="Style DNA 优秀句式">${phrase}</span>`
             );
           }
         });
@@ -158,52 +164,78 @@ export default function ArticleReader({ selectedVersion, onSelectVersion }: Arti
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full min-h-[600px]">
-      {/* Sidebar - Version Controller */}
+    <div className="flex flex-col lg:flex-row gap-6 h-full min-h-[500px]">
+      {/* Sidebar Controls */}
       <div className="w-full lg:w-64 flex flex-col gap-4 shrink-0">
+        {/* Toggle Mode Card */}
         <div className="bg-card border border-border rounded-lg p-4 flex flex-col gap-3">
-          <div className="flex items-center gap-2 text-xs font-mono font-bold tracking-wider text-muted-foreground uppercase">
-            <FileText className="w-3.5 h-full text-primary" />
-            <span>Document Vault (草稿库)</span>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-serif font-bold text-foreground flex items-center gap-1.5">
+              <Eye className="w-3.5 h-full text-primary" />
+              草稿对比模式
+            </span>
+            <button
+              onClick={() => {
+                setDraftCompareMode(!draftCompareMode);
+                toast.success(draftCompareMode ? "已切回【仅看最终定稿】模式" : "已开启【草稿对比】模式，可切换历史草稿");
+              }}
+              className={`w-10 h-5 rounded-full transition-colors relative ${
+                draftCompareMode ? "bg-primary" : "bg-muted"
+              }`}
+            >
+              <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                draftCompareMode ? "right-0.5" : "left-0.5"
+              }`} />
+            </button>
           </div>
-
-          <div className="flex flex-col gap-2">
-            {(["v1", "v2", "v3", "final"] as const).map(v => {
-              const verData = ARTICLE_VERSIONS.find(item => item.version === v)!;
-              const isSelected = selectedVersion === v;
-
-              return (
-                <button
-                  key={v}
-                  onClick={() => {
-                    onSelectVersion(v);
-                    toast.success(`已切换到 ${v === "final" ? "最终定稿" : `${v.toUpperCase()} 草稿`}`);
-                  }}
-                  className={`p-3 rounded-lg text-left border transition-all flex flex-col gap-1.5 ${
-                    isSelected
-                      ? "bg-primary/10 border-primary/40 text-primary"
-                      : "bg-background border-border hover:border-primary/20 text-foreground"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-muted">
-                      {v === "final" ? "FINAL V4" : `DRAFT ${v.toUpperCase()}`}
-                    </span>
-                    {isSelected && <ChevronRight className="w-3.5 h-full text-primary animate-in slide-in-from-left-1" />}
-                  </div>
-                  <span className="font-serif text-xs font-bold text-foreground line-clamp-1">
-                    {verData.title}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground line-clamp-2 leading-relaxed font-serif">
-                    {verData.description}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <p className="text-[10px] font-serif text-muted-foreground leading-relaxed">
+            默认仅展示您的 <strong>Final 终稿原文</strong>。开启后，可切换并对比历史草稿 (v1-v3) 迭代轨迹。
+          </p>
         </div>
 
-        {/* Highlight Control */}
+        {/* Conditional Draft List */}
+        {draftCompareMode && (
+          <div className="bg-card border border-border rounded-lg p-4 flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold tracking-wider text-muted-foreground uppercase">
+              <FileText className="w-3.5 h-full text-primary" />
+              <span>历史草稿版本 (Drafts)</span>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {(["v1", "v2", "v3", "final"] as const).map(v => {
+                const verData = ARTICLE_VERSIONS.find(item => item.version === v)!;
+                const isSelected = selectedVersion === v;
+
+                return (
+                  <button
+                    key={v}
+                    onClick={() => {
+                      onSelectVersion(v);
+                      toast.success(`已切换到 ${v === "final" ? "最终定稿" : `${v.toUpperCase()} 草稿`}`);
+                    }}
+                    className={`p-2.5 rounded-lg text-left border transition-all flex flex-col gap-1 ${
+                      isSelected
+                        ? "bg-primary/10 border-primary/40 text-primary"
+                        : "bg-background border-border hover:border-primary/20 text-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-muted">
+                        {v === "final" ? "FINAL V4" : `DRAFT ${v.toUpperCase()}`}
+                      </span>
+                      {isSelected && <ChevronRight className="w-3 h-full text-primary" />}
+                    </div>
+                    <span className="font-serif text-[11px] font-bold text-foreground line-clamp-1">
+                      {verData.title}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Highlight Control (Only available for Final) */}
         {selectedVersion === "final" && (
           <div className="bg-card border border-border rounded-lg p-4 flex flex-col gap-2.5">
             <div className="flex items-center justify-between">
@@ -239,17 +271,9 @@ export default function ArticleReader({ selectedVersion, onSelectVersion }: Arti
               <>
                 <strong>最终定稿 (v4 Final)</strong> 深度融合了您的 <strong>Style DNA</strong>：使用口语化中短句、无破折号、括号碎碎念，并经学术出处严谨核实。
               </>
-            ) : selectedVersion === "v3" ? (
-              <>
-                <strong>前额叶强化版 (v3)</strong> 大幅扩充了前额叶清障原理，排版更加结构化，但语言仍偏学术，缺少括号吐槽。
-              </>
-            ) : selectedVersion === "v2" ? (
-              <>
-                <strong>内容补全版 (v2)</strong> 找回了被删的核心机制（决策消耗、心理账户），但排版平铺直叙，缺乏视觉引导。
-              </>
             ) : (
               <>
-                <strong>原始初稿 (v1)</strong> 去除了 AI 腔，但为了缩减篇幅，把原作中有用的科学原理全删了，显得空洞单薄。
+                当前查看的是历史迭代版本（草稿 {selectedVersion.toUpperCase()}）。可通过开启“对比模式”来观察 AI 腔如何一步步退散，最终变成有血有肉的个人叙事。
               </>
             )}
           </p>
@@ -267,7 +291,7 @@ export default function ArticleReader({ selectedVersion, onSelectVersion }: Arti
             </span>
           </div>
           <div className="text-[10px] font-mono text-muted-foreground">
-            {selectedVersion === "final" ? "2200 字 • 4 个文献引用" : "约 1500 字 • 快速迭代中"}
+            {selectedVersion === "final" ? "2200 字 • 4 个文献引用" : "历史草稿归档"}
           </div>
         </div>
 
